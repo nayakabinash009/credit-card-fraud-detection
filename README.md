@@ -191,3 +191,35 @@ For fraud detection, recall is important because missed fraud cases are costly, 
 ---
 
 If you find this project useful, consider giving the repository a star.
+
+
+## Visual Results
+
+The following figures were generated from the uploaded Kaggle dataset.
+
+### Class distribution
+![Class distribution](results/figures/class_distribution.png)
+
+### Transaction amount distribution
+![Transaction amount distribution](results/figures/amount_distribution.png)
+
+### Feature correlation matrix
+![Feature correlation matrix](results/figures/correlation_matrix.png)
+
+### Outlier detection
+![Transaction amount outlier boxplots](results/figures/outlier_boxplot.png)
+
+### Model confusion matrices
+![Confusion matrices](results/figures/confusion_matrices.png)
+
+### ROC curve comparison
+![ROC curves](results/figures/roc_curves.png)
+
+### Random Forest feature importance
+![Feature importance](results/figures/feature_importance.png)
+
+### Generated model metrics
+
+See [model_comparison.csv](results/model_comparison.csv) for the precision, recall, F1-score, and ROC-AUC values from this visualization run.
+
+**Evaluation note:** EDA plots use the full dataset. For the model visualizations, a reproducible stratified training subset was used (all fraud examples in the training partition plus 30,000 legitimate transactions), with evaluation on the untouched stratified 20% test partition. The Amount scaler was fitted on the training subset only, and SMOTE was applied only to that training subset. These results are specific to this run and training setup.
