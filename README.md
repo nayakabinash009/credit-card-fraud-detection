@@ -1,172 +1,193 @@
 # Credit Card Fraud Detection
 
----
+A machine-learning pipeline for identifying potentially fraudulent credit-card transactions in a highly imbalanced dataset. The project explores the data, preprocesses transaction features, addresses class imbalance with SMOTE, trains three classifiers, and evaluates their predictions.
 
-## Abstract
+## Project overview
 
-The rapid growth of digital financial transactions has made credit card fraud detection a critical challenge for banks and customers alike. Fraudulent transactions are extremely rare — accounting for less than **0.2%** of all records — which creates a severe **class imbalance** problem. Traditional ML models often fail in this scenario, biasing toward the majority legitimate class and missing fraud cases.
+Credit-card fraud detection is challenging because fraudulent transactions represent only a very small fraction of all transactions. A model that predicts every transaction as legitimate can achieve high accuracy while failing to detect fraud. This project therefore evaluates models using precision, recall, F1-score, confusion matrices, and ROC curves rather than relying on accuracy alone.
 
-This project implements a structured ML pipeline on the [Kaggle Credit Card Fraud Detection dataset](https://www.kaggle.com/mlg-ulb/creditcardfraud), applying:
+### Models
 
-- **EDA** to understand feature distributions
-- **SMOTE** and undersampling to handle class imbalance
-- **Logistic Regression**, **Random Forest**, and **XGBoost** classifiers
-- Evaluation using **Recall, Precision, F1-Score, and AUC-ROC**
+- Logistic Regression — baseline classifier
+- Random Forest — tree-based ensemble classifier
+- XGBoost — gradient-boosting classifier
 
----
+### Workflow
 
-## Results Summary
+1. Load the Kaggle transaction dataset and inspect its shape, missing values, and fraud proportion.
+2. Run exploratory data analysis (EDA), unless disabled.
+3. Standardise the `Amount` feature and remove `Time`.
+4. Split the data into stratified training and test sets.
+5. Apply SMOTE to the training set by default (or skip it with `--no-smote`).
+6. Train Logistic Regression, Random Forest, and XGBoost.
+7. Evaluate the models and save comparison metrics and plots.
 
-| Model | Precision | Recall | F1-Score | AUC-ROC |
-|---|---|---|---|---|
-| Logistic Regression (Baseline) | 0.06 | **0.92** | 0.11 | — |
-| **Random Forest** ✅ | **0.87** | 0.83 | **0.85** | — |
-| XGBoost | 0.69 | 0.87 | — | — |
+## Dataset
 
-> **Random Forest** provides the best practical trade-off between catching fraud (Recall) and minimising false alarms (Precision).
+This project uses the **Credit Card Fraud Detection** dataset published by the Machine Learning Group at Université Libre de Bruxelles (ULB).
 
----
+- Dataset: [Credit Card Fraud Detection on Kaggle](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
+- Records: 284,807 transactions
+- Features: 30 input features, including PCA-transformed variables `V1`–`V28`, `Time`, and `Amount`
+- Target: `Class` (0 = legitimate, 1 = fraudulent)
+- Fraud cases: 492 (approximately 0.172%)
 
-## Project Structure
+The dataset is not included in this repository. Download `creditcard.csv` from Kaggle and place it at `data/creditcard.csv`.
 
-```
+## Repository structure
+
+```text
 credit-card-fraud-detection/
-│
 ├── data/
-│   └── .gitkeep              ← place creditcard.csv here (see below)
-│
+│   └── .gitkeep
+├── docs/
+│   └── report.docx
 ├── notebooks/
-│   └── credit_card_fraud_detection.ipynb   ← full step-by-step notebook
-│
+│   └── credit_card_fraud_detection.ipynb
+├── results/
+│   └── figures/
+│       └── .gitkeep
 ├── src/
 │   ├── __init__.py
-│   ├── eda.py                ← EDA plots (class dist, correlation, boxplots)
-│   ├── preprocess.py         ← scaling, splitting, SMOTE
-│   ├── train.py              ← LR / RF / XGBoost trainers
-│   └── evaluate.py           ← metrics, confusion matrices, ROC curves
-│
-├── results/
-│   ├── figures/              ← auto-generated plots (PNG)
-│   └── model_comparison.csv  ← auto-generated metrics table
-│
-├── docs/
-│   └── report.docx           ← original project report
-│
-├── main.py                   ← end-to-end CLI entry point
+│   ├── eda.py
+│   ├── evaluate.py
+│   ├── preprocess.py
+│   └── train.py
+├── main.py
 ├── requirements.txt
 ├── .gitignore
 └── README.md
 ```
 
----
-
-## Setup & Usage
+## Getting started
 
 ### 1. Clone the repository
+
 ```bash
-git clone https://github.com/<your-username>/credit-card-fraud-detection.git
+git clone https://github.com/nayakabinash009/credit-card-fraud-detection.git
 cd credit-card-fraud-detection
 ```
 
-### 2. Create a virtual environment 
+### 2. Create and activate a virtual environment
+
+**Windows PowerShell**
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+**macOS / Linux**
+
 ```bash
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 ### 3. Install dependencies
+
 ```bash
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 4. Download the dataset
-Download `creditcard.csv` from Kaggle:  
-https://www.kaggle.com/mlg-ulb/creditcardfraud  
+### 4. Add the dataset
 
-Place it in the `data/` folder:
-```
+Download `creditcard.csv` from the [Kaggle dataset page](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) and save it here:
+
+```text
 data/creditcard.csv
 ```
 
-### 5. Run the full pipeline
+### 5. Run the pipeline
+
+From the repository root:
+
 ```bash
 python main.py
 ```
 
-Optional flags:
+The command runs EDA, preprocessing, model training, evaluation, and Random Forest feature-importance plotting.
+
+### Optional command-line arguments
+
+| Argument | Description | Default |
+|---|---|---|
+| `--data` | Path to the CSV dataset | `data/creditcard.csv` |
+| `--test-size` | Fraction of data reserved for testing | `0.20` |
+| `--seed` | Random seed used for splitting and training | `42` |
+| `--no-smote` | Disable SMOTE oversampling | SMOTE enabled |
+| `--skip-eda` | Skip EDA plots | EDA enabled |
+
+Examples:
+
 ```bash
-python main.py --data data/creditcard.csv   # custom dataset path
-python main.py --no-smote                   # disable SMOTE
-python main.py --skip-eda                   # skip EDA plots (faster CI run)
-python main.py --test-size 0.25 --seed 0    # custom split & seed
+python main.py --data data/creditcard.csv
+python main.py --no-smote
+python main.py --skip-eda
+python main.py --test-size 0.25 --seed 0
 ```
 
-### 6. Run the Jupyter Notebook
+### Run the notebook
+
+To explore the analysis interactively:
+
 ```bash
 jupyter notebook notebooks/credit_card_fraud_detection.ipynb
 ```
 
----
+## Outputs
 
-## Machine Learning Pipeline
+Running the pipeline generates evaluation artifacts under `results/`:
 
-```
-Raw Dataset (creditcard.csv)
-        │
-        ▼
-┌─────────────────────────┐
-│  1. EDA                 │  class distribution, amount dist,
-│                         │  correlation matrix, outlier boxplots
-└────────────┬────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│  2. Preprocessing       │  StandardScaler on Amount,
-│                         │  drop Time, stratified 80/20 split
-└────────────┬────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│  3. SMOTE               │  applied only to training set
-│  (imbalance correction) │  0.17% fraud → balanced 50/50
-└────────────┬────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│  4. Model Training      │  Logistic Regression (baseline)
-│                         │  Random Forest (ensemble)
-│                         │  XGBoost (gradient boosting)
-└────────────┬────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│  5. Evaluation          │  Recall · Precision · F1 · AUC-ROC
-│                         │  confusion matrices, ROC curves
-└─────────────────────────┘
-```
+- `results/model_comparison.csv` — model metrics table
+- `results/figures/confusion_matrices.png` — confusion matrices for the trained models
+- `results/figures/roc_curves.png` — ROC curves
+- `results/figures/feature_importance.png` — Random Forest feature-importance plot
 
----
+The figures are generated by the evaluation code. The exact metric values depend on the dataset, dependency versions, and run configuration; run the pipeline to regenerate the results for your environment.
 
-## Dataset
+## Evaluation
 
-| Attribute | Value |
-|---|---|
-| Source | [Kaggle – MLG-ULB](https://www.kaggle.com/mlg-ulb/creditcardfraud) |
-| Transactions | 284,807 |
-| Features | 30 (V1–V28 via PCA, Amount, Time) |
-| Fraud cases | 492 (0.172%) |
-| Period | September 2013, European cardholders |
+The project reports:
 
-> **Note:** The dataset is **not included** in this repository due to its size and Kaggle's terms. Download it from the link above.
+- **Precision:** Of the transactions predicted as fraud, how many were actually fraud?
+- **Recall:** Of all actual fraudulent transactions, how many did the model identify?
+- **F1-score:** Harmonic mean of precision and recall.
+- **ROC-AUC:** Area under the receiver operating characteristic curve.
+- **Confusion matrix:** Counts of true/false positives and true/false negatives.
 
----
+For fraud detection, recall is important because missed fraud cases are costly, while precision also matters because too many false alarms can inconvenience legitimate customers. Model selection should consider both.
+
+## Implementation notes
+
+- The train/test split is stratified to preserve the rare fraud-class proportion.
+- SMOTE is applied to the training split only; the test split remains at its original class distribution.
+- In the current preprocessing implementation, `StandardScaler` is fitted to the `Amount` column before the train/test split. For a stricter evaluation without preprocessing leakage, fit the scaler on the training data only and apply that fitted scaler to the test data.
+- The dataset is not committed to this repository. Do not upload private or sensitive transaction data.
+
+## Technologies
+
+- Python
+- NumPy and pandas
+- scikit-learn
+- imbalanced-learn (SMOTE)
+- XGBoost
+- Matplotlib and Seaborn
+- Jupyter Notebook
 
 ## References
 
-1. Machine Learning Group – ULB, "Credit Card Fraud Detection Dataset," *Kaggle*, Sept. 2013.
-2. N. V. Chawla et al., "SMOTE: Synthetic Minority Over-sampling Technique," *JAIR*, vol. 16, 2002.
-3. L. Breiman, "Random Forests," *Machine Learning*, vol. 45, no. 1, 2001.
-4. T. Chen & C. Guestrin, "XGBoost: A Scalable Tree Boosting System," *KDD*, 2016.
-5. F. Pedregosa et al., "Scikit-learn: Machine Learning in Python," *JMLR*, vol. 12, 2011.
+1. [ULB Machine Learning Group — Credit Card Fraud Detection dataset](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
+2. N. V. Chawla et al., “SMOTE: Synthetic Minority Over-sampling Technique,” *Journal of Artificial Intelligence Research*, vol. 16, 2002.
+3. L. Breiman, “Random Forests,” *Machine Learning*, vol. 45, 2001.
+4. T. Chen and C. Guestrin, “XGBoost: A Scalable Tree Boosting System,” *Proceedings of KDD*, 2016.
+5. F. Pedregosa et al., “Scikit-learn: Machine Learning in Python,” *Journal of Machine Learning Research*, vol. 12, 2011.
+
+## Author
+
+**Abinash Nayak** — [GitHub profile](https://github.com/nayakabinash009)
 
 ---
+
+If you find this project useful, consider giving the repository a star.
